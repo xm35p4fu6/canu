@@ -477,6 +477,7 @@ sub getAllowedResources ($$$$$@) {
     elsif ($alg eq "hap")       {  $nam = "(read-to-haplotype assignment)"; }
     elsif ($alg eq "mhap")      {  $nam = "(overlap detection with mhap)"; }
     elsif ($alg eq "mmap")      {  $nam = "(overlap detection with minimap)"; }
+    elsif ($alg eq "hisea")     {  $nam = "(overlap detection with hisea)"; }
     elsif ($alg eq "ovl")       {  $nam = "(overlap detection)"; }
     elsif ($alg eq "cor")       {  $nam = "(read correction)"; }
     elsif ($alg eq "ovb")       {  $nam = "(overlap store bucketizer)"; }
@@ -593,6 +594,10 @@ sub configureAssembler () {
         setGlobalIfUndef("obtMMapMemory", "4-6");    setGlobalIfUndef("obtMMapThreads", "1-16");
         setGlobalIfUndef("utgMMapMemory", "4-6");    setGlobalIfUndef("utgMMapThreads", "1-16");
 
+        setGlobalIfUndef("corHiseaMemory", "4-6");    setGlobalIfUndef("corHiseaThreads", "1-16");
+        setGlobalIfUndef("obtHiseaMemory", "4-6");    setGlobalIfUndef("obtHiseaThreads", "1-16");
+        setGlobalIfUndef("utgHiseaMemory", "4-6");    setGlobalIfUndef("utgHiseaThreads", "1-16");
+
     } elsif (getGlobal("genomeSize") < adjustGenomeSize("500m")) {
         setGlobalIfUndef("corOvlHashBlockLength",     2500000);    setGlobalIfUndef("obtOvlHashBlockLength",   128 * $hx);    setGlobalIfUndef("utgOvlHashBlockLength",   128 * $hx);
         setGlobalIfUndef("corOvlRefBlockLength",      2000000);    setGlobalIfUndef("obtOvlRefBlockLength",   5000000000);    setGlobalIfUndef("utgOvlRefBlockLength",   5000000000);   #    5 Gbp
@@ -608,6 +613,10 @@ sub configureAssembler () {
         setGlobalIfUndef("corMMapMemory", "8-13");   setGlobalIfUndef("corMMapThreads", "1-16");
         setGlobalIfUndef("obtMMapMemory", "8-13");   setGlobalIfUndef("obtMMapThreads", "1-16");
         setGlobalIfUndef("utgMMapMemory", "8-13");   setGlobalIfUndef("utgMMapThreads", "1-16");
+
+        setGlobalIfUndef("corHiseaMemory", "8-13");   setGlobalIfUndef("corHiseaThreads", "1-16");
+        setGlobalIfUndef("obtHiseaMemory", "8-13");   setGlobalIfUndef("obtHiseaThreads", "1-16");
+        setGlobalIfUndef("utgHiseaMemory", "8-13");   setGlobalIfUndef("utgHiseaThreads", "1-16");
 
     } elsif (getGlobal("genomeSize") < adjustGenomeSize("2g")) {
         setGlobalIfUndef("corOvlHashBlockLength",     2500000);    setGlobalIfUndef("obtOvlHashBlockLength",   256 * $hx);    setGlobalIfUndef("utgOvlHashBlockLength",   256 * $hx);
@@ -625,6 +634,10 @@ sub configureAssembler () {
         setGlobalIfUndef("obtMMapMemory", "16-32");  setGlobalIfUndef("obtMMapThreads", "1-16");
         setGlobalIfUndef("utgMMapMemory", "16-32");  setGlobalIfUndef("utgMMapThreads", "1-16");
 
+        setGlobalIfUndef("corHiseaMemory", "16-32");  setGlobalIfUndef("corHiseaThreads", "4-16");
+        setGlobalIfUndef("obtHiseaMemory", "16-32");  setGlobalIfUndef("obtHiseaThreads", "4-16");
+        setGlobalIfUndef("utgHiseaMemory", "16-32");  setGlobalIfUndef("utgHiseaThreads", "4-16");
+
     } elsif (getGlobal("genomeSize") < adjustGenomeSize("5g")) {
         setGlobalIfUndef("corOvlHashBlockLength",     2500000);    setGlobalIfUndef("obtOvlHashBlockLength",   512 * $hx);    setGlobalIfUndef("utgOvlHashBlockLength",   512 * $hx);
         setGlobalIfUndef("corOvlRefBlockLength",      2000000);    setGlobalIfUndef("obtOvlRefBlockLength",  20000000000);    setGlobalIfUndef("utgOvlRefBlockLength",  20000000000);   #   20 Gbp
@@ -641,6 +654,10 @@ sub configureAssembler () {
         setGlobalIfUndef("obtMMapMemory", "16-48");  setGlobalIfUndef("obtMMapThreads", "1-16");
         setGlobalIfUndef("utgMMapMemory", "16-48");  setGlobalIfUndef("utgMMapThreads", "1-16");
 
+        setGlobalIfUndef("corHiseaMemory", "16-48");  setGlobalIfUndef("corHiseaThreads", "4-16");
+        setGlobalIfUndef("obtHiseaMemory", "16-48");  setGlobalIfUndef("obtHiseaThreads", "4-16");
+        setGlobalIfUndef("utgHiseaMemory", "16-48");  setGlobalIfUndef("utgHiseaThreads", "4-16");
+
     } else {
         setGlobalIfUndef("corOvlHashBlockLength",     2500000);    setGlobalIfUndef("obtOvlHashBlockLength",   512 * $hx);    setGlobalIfUndef("utgOvlHashBlockLength",   512 * $hx);
         setGlobalIfUndef("corOvlRefBlockLength",      2000000);    setGlobalIfUndef("obtOvlRefBlockLength",  30000000000);    setGlobalIfUndef("utgOvlRefBlockLength",  30000000000);   #   30 Gbp
@@ -656,6 +673,11 @@ sub configureAssembler () {
         setGlobalIfUndef("corMMapMemory", "32-64");  setGlobalIfUndef("corMMapThreads", "1-16");
         setGlobalIfUndef("obtMMapMemory", "32-64");  setGlobalIfUndef("obtMMapThreads", "1-16");
         setGlobalIfUndef("utgMMapMemory", "32-64");  setGlobalIfUndef("utgMMapThreads", "1-16");
+
+        setGlobalIfUndef("corHiseaMemory", "32-64");  setGlobalIfUndef("corHiseaThreads", "4-16");
+        setGlobalIfUndef("obtHiseaMemory", "32-64");  setGlobalIfUndef("obtHiseaThreads", "4-16");
+        setGlobalIfUndef("utgHiseaMemory", "32-64");  setGlobalIfUndef("utgHiseaThreads", "4-16");
+
     }
 
     #  Overlap store construction should be based on the number of overlaps, but we obviously don't
@@ -828,14 +850,17 @@ sub configureAssembler () {
 
     ($err, $all) = getAllowedResources("cor", "mhap",      $err, $all, 0)   if (getGlobal("corOverlapper") eq "mhap");
     ($err, $all) = getAllowedResources("cor", "mmap",      $err, $all, 0)   if (getGlobal("corOverlapper") eq "minimap");
+    ($err, $all) = getAllowedResources("cor", "hisea",     $err, $all, 0)   if (getGlobal("corOverlapper") eq "hisea");
     ($err, $all) = getAllowedResources("cor", "ovl",       $err, $all, 0)   if (getGlobal("corOverlapper") eq "ovl");
 
     ($err, $all) = getAllowedResources("obt", "mhap",      $err, $all, 0)   if (getGlobal("obtOverlapper") eq "mhap");
     ($err, $all) = getAllowedResources("obt", "mmap",      $err, $all, 0)   if (getGlobal("obtOverlapper") eq "minimap");
+    ($err, $all) = getAllowedResources("obt", "hisea",     $err, $all, 0)   if (getGlobal("obtOverlapper") eq "hisea");
     ($err, $all) = getAllowedResources("obt", "ovl",       $err, $all, 0)   if (getGlobal("obtOverlapper") eq "ovl");
 
     ($err, $all) = getAllowedResources("utg", "mhap",      $err, $all, 0)   if (getGlobal("utgOverlapper") eq "mhap");
     ($err, $all) = getAllowedResources("utg", "mmap",      $err, $all, 0)   if (getGlobal("utgOverlapper") eq "minimap");
+    ($err, $all) = getAllowedResources("utg", "hisea",     $err, $all, 0)   if (getGlobal("utgOverlapper") eq "hisea");
     ($err, $all) = getAllowedResources("utg", "ovl",       $err, $all, 0)   if (getGlobal("utgOverlapper") eq "ovl");
 
     ($err, $all) = getAllowedResources("",    "cor",       $err, $all, 0);

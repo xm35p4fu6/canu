@@ -41,6 +41,7 @@ use canu::Meryl;
 use canu::OverlapInCore;
 use canu::OverlapMhap;
 use canu::OverlapMMap;
+use canu::OverlapHisea;
 use canu::OverlapStore;
 
 use canu::CorrectReads;
@@ -376,6 +377,7 @@ print STDERR "--\n";
 
 checkJava();
 checkMinimap($bin);
+checkHisea($bin);
 checkGnuplot();
 
 checkParameters();
@@ -1006,6 +1008,11 @@ sub overlap ($$) {
         mmapConfigure($asm, $tag, $ovlType);
         mmapPrecomputeCheck($asm, $tag, $ovlType)  foreach (1..getGlobal("canuIterationMax") + 1);
         mmapCheck($asm, $tag, $ovlType)            foreach (1..getGlobal("canuIterationMax") + 1);
+
+   } elsif (getGlobal("${tag}overlapper") eq "hisea") {
+        hiseaConfigure($asm, $tag, $ovlType);
+        hiseaPrecomputeCheck($asm, $tag, $ovlType)  foreach (1..getGlobal("canuIterationMax") + 1);
+        hiseaCheck($asm, $tag, $ovlType)            foreach (1..getGlobal("canuIterationMax") + 1);
 
     } else {
         overlapConfigure($asm, $tag, $ovlType);

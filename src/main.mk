@@ -174,6 +174,8 @@ SUBMAKEFILES := stores/dumpBlob.mk \
                 \
                 minimap/mmapConvert.mk \
                 \
+                hisea/hiseaConvert.mk \
+                \
                 correction/filterCorrectionOverlaps.mk \
                 correction/generateCorrectionLayouts.mk \
                 correction/filterCorrectionLayouts.mk \

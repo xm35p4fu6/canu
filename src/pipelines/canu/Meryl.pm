@@ -67,6 +67,10 @@ sub merylParameters ($$) {
         $merSize = getGlobal("${tag}mhapMerSize");
         $name    = "$asm.ms$merSize";
 
+    } elsif (getGlobal("${tag}Overlapper") eq "hisea") {
+        $merSize = getGlobal("${tag}hiseaMerSize");
+        $name    = "$asm.ms$merSize";
+
     } elsif (getGlobal("${tag}Overlapper") eq "minimap") {
         $merSize = 0;
         $name    = undef;
@@ -645,6 +649,9 @@ sub merylConfigure ($$) {
     }
 
     if ("${tag}Overlapper" eq "minimap") {
+    }
+
+    if ("${tag}Overlapper" eq "hisea") {
     }
 
     print F "#\n";

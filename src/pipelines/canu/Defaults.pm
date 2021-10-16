@@ -33,6 +33,7 @@ require Exporter;
              setParametersFromCommandLine
              checkJava
              checkMinimap
+             checkHisea
              checkGnuplot
              adjustMemoryValue
              displayMemoryValue
@@ -150,12 +151,14 @@ sub setGlobal ($$) {
     if ($var eq "gridoptionsovl")  { setGlobal("gridOptionsCORovl",  $val);  setGlobal("gridOptionsOBTovl",  $val);  setGlobal("gridOptionsUTGovl",  $val);  return; }
     if ($var eq "gridoptionsmhap") { setGlobal("gridOptionsCORmhap", $val);  setGlobal("gridOptionsOBTmhap", $val);  setGlobal("gridOptionsUTGmhap", $val);  return; }
     if ($var eq "gridoptionsmmap") { setGlobal("gridOptionsCORmmap", $val);  setGlobal("gridOptionsOBTmmap", $val);  setGlobal("gridOptionsUTGmmap", $val);  return; }
+    if ($var eq "gridoptionshisea") { setGlobal("gridOptionsCORhisea", $val);  setGlobal("gridOptionsOBThisea", $val);  setGlobal("gridOptionsUTGhisea", $val);  return; }
 
-    foreach my $opt ("ovlmemory",      "mhapmemory",      "mmapmemory",      #  Execution options
-                     "ovlthreads",     "mhapthreads",     "mmapthreads",
-                     "ovlconcurrency", "mhapconcurrency", "mmapconcurrency",
+    foreach my $opt ("ovlmemory", "mhapmemory", "mmapmemory", "hiseamemory", #  Execution options
+                     "ovlthreads",     "mhapthreads",     "mmapthreads", "hiseathreads",
+                     "ovlconcurrency", "mhapconcurrency", "mmapconcurrency", "hiseaconcurrency",
                      "overlapper",                                           #  Overlap algorithm selection
                      "realign",
+
                      "ovlerrorrate",                                         #  Overlapper options
                      "ovlhashblocklength",
                      "ovlrefblocklength",
@@ -165,6 +168,7 @@ sub setGlobal ($$) {
                      "ovlmerthreshold",
                      "ovlmerdistinct",
                      "ovlfrequentmers",
+
                      "mhapblocksize",                                        #  Mhap options
                      "mhapmersize",
                      "mhapsensitivity",
@@ -172,8 +176,18 @@ sub setGlobal ($$) {
                      "mhapfilterthreshold",
                      "mhapnotf",
                      "mhappipe",
+
+                     "hiseablocksize",                                        #  Hisea options
+                     "hiseamersize",
+                     "hiseasensitivity",
+                     "hiseafilterunique",
+                     "hiseafilterthreshold",
+                     "hiseanotf",
+                     "hiseapipe",
+
                      "mmapblocksize",                                        #  Minimap options
                      "mmapmersize") {
+
         if ($var eq "$opt") {
             setGlobal("cor$opt", $val);
             setGlobal("obt$opt", $val);
@@ -543,6 +557,16 @@ sub printCitation ($$) {
        print STDERR "${prefix}\n";
     }
 
+    if ((getGlobal("corOverlapper") eq "hisea") ||
+        (getGlobal("obtOverlapper") eq "hisea") ||
+        (getGlobal("utgOverlapper") eq "hisea")) {
+       print STDERR "${prefix}  Nilesh Khiste & Lucian Ilie.\n";
+       print STDERR "${prefix}  HISEA: HIerarchical SEed Aligner for PacBio data\n";
+       print STDERR "${prefix}  BMC Bioinformatics volume 18, Article number: 564 (2017).\n";
+       print STDERR "${prefix}  https://doi.org/10.1186/s12859-017-1953-9\n";
+       print STDERR "${prefix}\n";
+    }
+
     if ((getGlobal("corOverlapper") eq "minimap") ||
         (getGlobal("obtOverlapper") eq "minimap") ||
         (getGlobal("utgOverlapper") eq "minimap")) {
@@ -769,6 +793,19 @@ sub setOverlapDefaults ($$$) {
     setDefault("${tag}MhapOrderedMerSize",  ($tag eq "cor") ? 12 : 18, "K-mer size for second-stage filter in mhap");
     setDefault("${tag}MhapSensitivity",     undef,                     "Coarse sensitivity level: 'low', 'normal' or 'high'.  Set automatically based on coverage; 'high' <= 30x < 'normal' < 60x <= 'low'");
 
+    #  Hisea parameters.  FilterThreshold MUST be a string, otherwise it gets printed in scientific notation (5e-06) which java doesn't understand.
+
+    #    setDefault("${tag}HiseaVersion",         "2.1.3",                   "Version of the MHAP jar file to use");
+    setDefault("${tag}HiseaFilterThreshold", "0.0000001",               "Value between 0 and 1. kmers which comprise more than this percentage of the input are downweighted");
+    setDefault("${tag}HiseaFilterUnique",    undef,                     "Expert option: True or false, supress the low-frequency k-mer distribution based on them being likely noise and not true overlaps. Threshold auto-computed based on error rate and coverage.");
+    #    setDefault("${tag}HiseaNoTf",            undef,                     "Expert option: True or false, do not use tf weighting, only idf of tf-idf.");
+    setDefault("${tag}HiseaOptions",         undef,                     "Expert option: free-form parameters to pass to MHAP.");
+    setDefault("${tag}HiseaPipe",            1,                         "Report results to a pipe instead of *large* files.");
+    setDefault("${tag}HiseaBlockSize",       3000,                      "Number of reads per GB of memory allowed (hiseaMemory)");
+    setDefault("${tag}HiseaMerSize",         ($tag eq "cor") ? 16 : 16, "K-mer size for seeds in hisea");
+    #    setDefault("${tag}HiseaOrderedMerSize",  ($tag eq "cor") ? 12 : 18, "K-mer size for second-stage filter in hisea");
+    setDefault("${tag}HiseaSensitivity",     undef,                     "Coarse sensitivity level: 'low', 'normal' or 'high'.  Set automatically based on coverage; 'high' <= 30x < 'normal' < 60x <= 'low'");
+
     #  MiniMap parameters.
 
     setDefault("${tag}MMapBlockSize",       6000,                      "Number of reads per 1GB; memory * blockSize = the size of  block loaded into memory per job");
@@ -810,6 +847,7 @@ sub setDefaults () {
     setDefault("shell",               "/bin/sh",  "Command interpreter to use; sh-compatible (e.g., bash), NOT C-shell (csh or tcsh); default '/bin/sh'");
 
     setDefault("minimap",             "minimap2", "Path to minimap2; default 'minimap2'");
+    setDefault("hisea",               "hisea",    "Path to hisea; default 'hisea'");
 
     setDefault("java",                $java,      "Java interpreter to use; at least version 1.8; default 'java'");
     setDefault("javaUse64Bit",        undef,      "Java interpreter supports the -d64 or -d32 flags; default auto");
@@ -911,6 +949,10 @@ sub setDefaults () {
     setExecDefaults("cormhap",   "mhap overlaps for correction");
     setExecDefaults("obtmhap",   "mhap overlaps for trimming");
     setExecDefaults("utgmhap",   "mhap overlaps for unitig construction");
+
+    setExecDefaults("corhisea",   "hisea overlaps for correction");
+    setExecDefaults("obthisea",   "hisea overlaps for trimming");
+    setExecDefaults("utghisea",   "hisea overlaps for unitig construction");
 
     setExecDefaults("cormmap",   "mmap overlaps for correction");
     setExecDefaults("obtmmap",   "mmap overlaps for trimming");
@@ -1148,6 +1190,37 @@ sub checkMinimap ($) {
 }
 
 
+sub checkHisea ($) {
+    my $hisea = getGlobal("hisea");
+    my $version = undef;
+
+    return  if ((getGlobal("corOverlapper") ne "hisea") &&
+                (getGlobal("obtOverlapper") ne "hisea") &&
+                (getGlobal("utgOverlapper") ne "hisea"));
+
+    if ($hisea =~ m/^\./) {
+        addCommandLineError("ERROR:  path to hisea '$hisea' must not be a relative path.\n");
+        goto cleanupHisea;
+    }
+
+    system("cd /tmp && $hisea --version > /tmp/hisea-$$.err 2>&1");
+
+    open(F, "< /tmp/hisea-$$.err");
+    while (<F>) {
+        $version = $1  if ($_ =~ m/^(v.*$)/);
+    }
+    close(F);
+
+    if (!defined($version)) {
+        addCommandLineError("ERROR:  failed to run hisea using command '$hisea'.\n");
+        goto cleanupHisea;
+    }
+
+    print STDERR "-- Detected hisea version '$version' (from '$hisea').\n";
+
+ cleanupHisea:
+    unlink "/tmp/hisea-$$.err";
+}
 
 sub checkGnuplot () {
     my $gnuplot = getGlobal("gnuplot");
@@ -1522,8 +1595,9 @@ sub checkParameters () {
     foreach my $tag ("cor", "obt", "utg") {
         if ((getGlobal("${tag}Overlapper") ne "mhap") &&
             (getGlobal("${tag}Overlapper") ne "ovl")  &&
+            (getGlobal("${tag}Overlapper") ne "hisea")  &&
             (getGlobal("${tag}Overlapper") ne "minimap")) {
-            addCommandLineError("ERROR:  Invalid '${tag}Overlapper' specified (" . getGlobal("${tag}Overlapper") . "); must be 'mhap', 'ovl', or 'minimap'\n");
+            addCommandLineError("ERROR:  Invalid '${tag}Overlapper' specified (" . getGlobal("${tag}Overlapper") . "); must be 'mhap', 'ovl', 'hisea', or 'minimap'\n");
         }
     }
 
@@ -1666,6 +1740,7 @@ sub checkParameters () {
         addCommandLineError("contigFilter 'lowCovFraction' must be between 0.0 and 1.0, currently $v[3]\n")   if (($v[3] < 0) || (1 < $v[3]) || ($v[3] !~ m/^[0-9]*\.{0,1}[0-9]*$/));
         addCommandLineError("contigFilter 'lowCovDepth' must be a positive integer, currently $v[4]\n")       if (($v[4] < 0) || ($v[4] !~ m/^[0-9]+$/));
     }
+
 }
 
 

@@ -702,6 +702,7 @@ all: $(addprefix ${TARGET_DIR}/,${ALL_TGTS}) \
      ${TARGET_DIR}/lib/site_perl/canu/OverlapInCore.pm \
      ${TARGET_DIR}/lib/site_perl/canu/OverlapMhap.pm \
      ${TARGET_DIR}/lib/site_perl/canu/OverlapMMap.pm \
+     ${TARGET_DIR}/lib/site_perl/canu/OverlapHisea.pm \
      ${TARGET_DIR}/lib/site_perl/canu/OverlapStore.pm \
      ${TARGET_DIR}/lib/site_perl/canu/Report.pm \
      ${TARGET_DIR}/lib/site_perl/canu/Unitig.pm
@@ -826,6 +827,9 @@ ${TARGET_DIR}/lib/site_perl/canu/OverlapMhap.pm: pipelines/canu/OverlapMhap.pm
 
 ${TARGET_DIR}/lib/site_perl/canu/OverlapMMap.pm: pipelines/canu/OverlapMMap.pm
 	cp -pf pipelines/canu/OverlapMMap.pm ${TARGET_DIR}/lib/site_perl/canu/
+
+${TARGET_DIR}/lib/site_perl/canu/OverlapHisea.pm: pipelines/canu/OverlapHisea.pm
+	cp -pf pipelines/canu/OverlapHisea.pm ${TARGET_DIR}/lib/site_perl/canu/
 
 ${TARGET_DIR}/lib/site_perl/canu/OverlapStore.pm: pipelines/canu/OverlapStore.pm
 	cp -pf pipelines/canu/OverlapStore.pm ${TARGET_DIR}/lib/site_perl/canu/
